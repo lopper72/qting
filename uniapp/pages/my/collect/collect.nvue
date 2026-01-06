@@ -1,0 +1,112 @@
+<template>
+	<view>
+		<view class="collect-list">
+			<text class="nodata-box" v-if="!dataInfo || dataInfo.list.length == 0">{{loaded ? '暂无内容' : '正在加载...'}}</text>
+			<template v-for="(item,index) in dataInfo.list" v-else>
+				<my-card :info="item" style="margin-bottom: 20rpx;"></my-card>
+			</template>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	
+	import {myCollect} from "@/js_sdk/video.js"
+	export default {
+		data() {
+			return {
+				dataInfo:null,
+				loaded:false
+			}
+		},
+		computed:{
+			...mapGetters(["userInfo"])
+		},
+		onShow() {
+			if(!this.dataInfo) this.getCollectList()
+		},
+		onPullDownRefresh() {
+			this.getCollectList(true)
+		},
+		onReachBottom() {
+			if(this.dataInfo && this.dataInfo.current_page>=this.dataInfo.total_page) return
+			this.dataInfo.current_page++
+			this.getCollectList()
+		},
+		methods: {
+			getCollectList(replace){
+				myCollect({
+					page:this.dataInfo ? this.dataInfo.current_page : 1,
+					user_id:this.userInfo.id,
+					type:4,
+					limit:20
+				}).then(res=>{//console.log(res)
+					this.loaded = true
+					uni.stopPullDownRefresh()
+					if(this.dataInfo){
+						if(replace){
+							this.dataInfo = res.data
+						}else{
+							this.dataInfo.list = this.dataInfo.list.concat(res.data.list)
+							this.dataInfo.total_page = res.data.total_page
+							this.dataInfo.current_page = res.data.current_page
+						}
+					}else{
+						uni.stopPullDownRefresh()
+						this.dataInfo = res.data
+					}
+				}).catch(error=>{
+					this.loaded = true
+					console.log(error)
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+.nodata-box{
+	padding: 20rpx;
+	text-align: center;
+	font-size: $uni-font-size-base;
+	color: #F1F1F1;
+}
+.collect-list{
+	padding: 20rpx;
+}
+.follow-item{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #2C405A;
+	border-radius: 10rpx;
+	padding: 20rpx;
+	margin-bottom: 20rpx;
+}
+.info-box{
+	flex-direction: row;
+	align-items: center;
+}
+.avatar-image{
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 80rpx;
+	border-width: 2px;
+	border-color: #ff7ddd;
+}
+.username{
+	font-size: 32rpx;
+	color: #F1F1F1;
+	margin-left: 20rpx;
+}
+.cancel-follow-btn{
+	background-color: #3F536E;
+	color: #F1F1F1;
+	font-size: $uni-font-size-sm;
+	padding: 10rpx 20rpx;
+	border-radius: 10rpx;
+}
+</style>

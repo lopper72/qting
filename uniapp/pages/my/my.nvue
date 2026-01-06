@@ -1,0 +1,188 @@
+<template>
+	<view>
+		<template v-if="userInfo">
+			<view class="user-info-box">
+				<view class="avatar">
+					<image mode="aspectFill" :src="userInfo.avatar" class="avatar-image"></image>
+				</view>
+				<view class="user-info">
+					<view class="user-phone">
+						<text class="user-phone-text">{{userInfo.phone}}</text>
+					</view>
+					<view class="user-vip">
+						<text class="vip-text">会员有效期至：{{userInfo.vip_end_time ? userInfo.vip_end_time : "未开通会员"}}</text>
+					</view>
+				</view>
+			</view>
+			<view class="tool-bar-box">
+				<view class="tool-item" @click="goToPage('/pages/my/followed/followed')">
+					<text class="num-text">{{userInfo.my_follow_num}}</text>
+					<text class="tool-text">关注</text>
+				</view>
+				<view class="tool-item" @click="goToPage('/pages/my/fans/fans')">
+					<text class="num-text">{{userInfo.follow_num}}</text>
+					<text class="tool-text">粉丝</text>
+				</view>
+				<view class="tool-item" @click="goToPage('/pages/my/comment/comment')">
+					<text class="num-text">{{userInfo.film_review_num}}</text>
+					<text class="tool-text">影评</text>
+				</view>
+			</view>
+			<view class="blank-height"></view>
+			<uni-grid :column="3" borderColor="#000000" :highlight="false" :hideOuterBorder="true">
+			    <uni-grid-item  :index="1">
+					<view class="card-item">
+						<text class="icon-font grid-icon">&#xe605;</text>
+						<text class="grid-text">我的会员</text>
+					</view>
+			    </uni-grid-item>
+			    <uni-grid-item  :index="2">
+			        <view class="card-item">
+						<text class="icon-font grid-icon">&#xe625;</text>
+						<text class="grid-text">离线缓存</text>
+					</view>
+			    </uni-grid-item>
+			    <uni-grid-item  :index="3">
+			        <view class="card-item" @click="goToPage('/pages/my/hisgory/hisgory')">
+						<text class="icon-font grid-icon">&#xe656;</text>
+						<text class="grid-text">继续观看</text>
+					</view>
+			    </uni-grid-item>
+				<uni-grid-item  :index="4">
+					<view class="card-item" @click="goToPage('/pages/my/collect/collect')">
+						<text class="icon-font grid-icon">&#xe705;</text>
+						<text class="grid-text">我的片单</text>
+					</view>
+				</uni-grid-item>
+				<uni-grid-item  :index="5">
+				    <view class="card-item" @click="goToPage('/pages/my/like/like')">
+						<text class="icon-font grid-icon">&#xe628;</text>
+						<text class="grid-text">喜欢影视</text>
+					</view>
+				</uni-grid-item>
+				<uni-grid-item  :index="6">
+				    <view class="card-item" @click="goToPage('/pages/my/setting/setting')">
+						<text class="icon-font grid-icon">&#xe624;</text>
+						<text class="grid-text">我的设置</text>
+					</view>
+				</uni-grid-item>
+			</uni-grid>
+			
+			
+			<view style="margin-top: 50rpx;">
+				<text class="copy">系统开发商：优雅草科技-蜻蜓F影视系统</text>
+				<text class="copy">官网：songshu.youyacao.com</text>
+				<text class="copy">本系统所有内容仅供功能演示不做其他一切商业用途！！！</text>
+			</view>
+		</template>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	import {getUser} from "@/js_sdk/user.js"
+	
+	export default {
+		data() {
+			return {
+				
+			}
+		},
+		computed: {
+			...mapGetters(['statusBarHeight', 'pageInfo','userInfo','isLogin'])
+		},
+		onShow() {
+			
+			if(!this.isLogin){
+				uni.navigateTo({
+					url:"/pages/login/login"
+				})
+				return
+			}
+			getUser().then(res=>{
+				this.$store.dispatch("userInfo",res.data)
+			}).catch(error=>{
+				console.log(error)
+			})
+		},
+		methods: {
+			goToPage(page){
+				uni.navigateTo({
+					url:page
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+.copy{
+	    color: #b1acac;
+	    font-size: 24rpx;
+		text-align: center;
+}	
+	
+.user-info-box{
+	flex-direction: row;
+	align-items: center;
+	padding: 30rpx 20rpx;
+}
+
+.avatar-image{
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 120rpx;
+	border-width: 2px;
+	border-color: #00a3ff;
+}
+.user-info{
+	margin-left: 20rpx;
+}
+.user-phone-text{
+	font-size: $uni-font-size-lg;
+	color: #F1F1F1;
+	font-weight: bold;
+}
+.user-vip{
+	margin-top: 10rpx;
+}
+.vip-text{
+	font-size: $uni-font-size-sm;
+	color: #C8C7CC;
+}
+.tool-bar-box{
+	border-top-color: #000000;
+	border-top-width: 1px;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 40rpx 80rpx;
+}
+.tool-item{
+	align-items: center;
+}
+.num-text{
+	font-size: $uni-font-size-base;
+	color: #C8C7CC;
+	margin-bottom: 10rpx;
+}
+.tool-text{
+	font-size: $uni-font-size-base;
+	color: #C8C7CC;
+}
+.card-item{
+	justify-content: center;
+	align-items: center;
+	flex: 1;
+}
+.grid-icon{
+	color: #C8C7CC;
+	font-size:60rpx;
+	margin-bottom: 20rpx;
+}
+.grid-text{
+	color: #C8C7CC;
+	font-size: $uni-font-size-base;
+}
+</style>

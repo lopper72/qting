@@ -1,0 +1,125 @@
+<template>
+	<view class="content">
+		<view class="category-list" v-for="(cate,index) in cateList" :key="cate.id">
+			<view class="cate-title-box">
+				<text class="category-title">{{cate.name}}</text>
+				<text class="more-title" v-if="0">更多</text>
+			</view>
+			<uni-grid :column="3" :show-border="false" :square="false" :highlight="false">
+				<uni-grid-item v-for="(item,_index) in cate.list" :key="item.id">
+					<view class="item-box" @click="goTodetail(item)">
+						<image class="cate-image" :src="item.thumb" v-if="item.thumb"></image>
+						<image class="cate-image" v-else src="@/static/images/no_image.jpg"></image>
+						<text class="item-title">{{item.title}}</text>
+						<text class="item-score">{{item.score}}</text>
+					</view>
+				</uni-grid-item>
+			</uni-grid>
+		</view>
+	</view>
+</template>
+
+<script>
+	//#7b7b7b，#ff1337
+	import config from '@/common/config.js'
+	import {hotVideo} from '@/js_sdk/index.js'
+	
+	export default {
+		data() {
+			return {
+				base_url:config.image_base,
+				cateList:[]
+			}
+		},
+		onLoad() {
+			this.getHot()
+		},
+		onShow() {
+			
+		},
+		onPullDownRefresh() {
+			this.getHot()
+		},
+		methods: {
+			getHot(){
+				hotVideo().then(res=>{
+					uni.stopPullDownRefresh()
+					this.cateList = res.data
+				}).catch(error=>{
+					uni.stopPullDownRefresh()
+					console.log(error)
+				})
+			},
+			goTolist(cate){
+				uni.navigateTo({
+					url:"/pages/vlist/vlist?id="+cate.id+"&name="+cate.name
+				})
+			},
+			goTodetail(item){
+				this.$store.dispatch("video",item)
+				uni.navigateTo({
+					url:"/pages/detail/detail?id="+item.id
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.content {
+		padding: 20rpx;
+	}
+	.category-list{
+		margin-bottom: 20rpx;
+	}
+	.cate-title-box{
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.more-title{
+		color: #F8F8F8;
+		font-size: $uni-font-size-base;
+	}
+	.category-title{
+		color: #FFFFFF;
+		font-size:$uni-font-size-lg;
+		font-weight: bold;
+	}
+	.sub-cate-list{
+		flex-direction: row;
+		background-color: #007AFF;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.item-box{
+		width: 220rpx;
+		margin: 10rpx 0rpx;
+		background-color: #C8C7CC;
+	}
+	.cate-image{
+		width: 220rpx;
+		height: 280rpx;
+	}
+	.item-title{
+		background-color: rgba(0,0,0,0.3);
+		color: #FFFFFF;
+		position: absolute;
+		left: 0px;
+		right: 0px;
+		padding: 10rpx;
+		bottom: 0px;
+		font-size: $uni-font-size-base;
+		text-align: center;
+		lines: 1;
+		text-overflow: ellipsis;
+	}
+	.item-score{
+		position: absolute;
+		top: 5rpx;
+		right: 10rpx;
+		font-size: $uni-font-size-base;
+		color: #ce5e30;
+		font-weight: bold;
+	}
+</style>

@@ -1,0 +1,213 @@
+<template>
+	<view>
+		<view class="input-area">
+			<textarea v-model="formData.content" placeholder="评电影,好比评人生" class="input-box" :maxlength="2000"></textarea>
+		</view>
+		<view class="image-box">
+			<view class="image-item" v-for="(image,index) in imageList" :key="index">
+				<image class="image-style" mode="aspectFill" :src="image"></image>
+				<text class="icon-font delete-btn" @click="onDeleteImage(index)">&#xe638;</text>
+			</view>
+			<view class="add-image" @click="onAddimages()" v-if="imageList.length<9">
+				<text class="icon-font add-text">&#xe620;</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		uploadImage,
+		addComment
+	} from "@/js_sdk/video.js"
+	import Test from '@/common/test.js'
+
+	export default {
+		data() {
+			return {
+				imageList: [],
+				uploadedCount: 0,
+				formData: {
+					type: 3,
+					oid: null,
+					content: "",
+					images: []
+				},
+				machineResult: {
+					Normal: "正常",
+					Polity: "涉政",
+					Sex: "色情",
+					Terror: "暴恐",
+					Legal: "违法违规",
+					Ad: "广告"
+				}
+			}
+		},
+		onLoad(op) {
+			this.formData.oid = op.vid
+		},
+		onNavigationBarButtonTap() {
+			this.onSubmit()
+		},
+		methods: {
+			_checkImage(content, index) {
+				console.log(content, index)
+				Test('image', content).then(({
+					machine_result
+				}) => {
+					if (machine_result === 'Normal') {
+						this.formData.images.push(content)
+					} else {
+						const msg = this.machineResult[machine_result]
+						uni.showToast({
+							title: `检测到您的图片涉及${msg}，已自动删除。`,
+							icon: 'none'
+						})
+						this.imageList.splice(index, 1)
+					}
+				})
+			},
+			_checkText() {
+				uni.hideKeyboard()
+				const content = this.formData.content
+				if (!content) {
+					return uni.showToast({
+						icon: "none",
+						title: "请填写影评内容"
+					})
+				}
+				Test('text', content).then(({
+					machine_result
+				}) => {
+					if (machine_result === 'Normal') {
+						this.onSubmit()
+					} else {
+						const msg = this.machineResult[machine_result]
+						uni.showToast({
+							title: `检测到您的文字内容涉及${msg}，请重新输入。`,
+							icon: 'none'
+						})
+						this.content = ''
+					}
+				})
+			},
+			onAddimages() {
+				uni.chooseImage({
+					count: 9 - this.imageList.length,
+					success: (res) => {
+						this.imageList = this.imageList.concat(res.tempFilePaths)
+						this.uploadImages(0)
+					}
+				})
+			},
+			onDeleteImage(index) {
+				this.imageList.splice(index, 1)
+			},
+			uploadImages(index) {
+				uni.showLoading({
+					title: "正在上传图片",
+					mask: true
+				})
+				var file = this.imageList[index]
+				uploadImage({
+					filePath: file
+				}).then(({ code, data }) => {
+					this.uploadedCount++
+					if (code === 200) {
+						this._checkImage(data.url, index)
+					}
+					if (this.uploadedCount !== this.imageList.length) {
+						this.uploadImages(++index)
+					}
+				}).catch(error => {
+					this.uploadedCount++
+					if (this.uploadedCount !== this.imageList.length) {
+						this.uploadImages(++index)
+					}
+				})
+			},
+			onSubmit() {
+				uni.showLoading({
+					title: "正在发布",
+					mask: true
+				})
+				addComment(this.formData).then(res => {
+					uni.hideLoading()
+					uni.showModal({
+						title: "提示",
+						showCancel: false,
+						content: "影评发布成功",
+						success: () => {
+							uni.navigateBack({
+								delta: 1
+							})
+						}
+					})
+				}).catch(error => {
+					uni.hideLoading()
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.input-area {
+		padding: 20rpx;
+	}
+
+	.input-box {
+		font-size: $uni-font-size-base;
+		color: #FFFFFF;
+		padding: 12rpx 0rpx;
+	}
+
+	.image-box {
+		padding: 20rpx;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.add-image {
+		width: 218rpx;
+		height: 120rpx;
+		background-color: #232323;
+		margin: 10rpx;
+		border-radius: 10rpx;
+		border-width: 1px;
+		border-color: #555555;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.add-text {
+		font-size: 40rpx;
+		color: #C0C0C0;
+	}
+
+	.image-item {
+		width: 218rpx;
+		height: 120rpx;
+		margin: 10rpx;
+	}
+
+	.image-style {
+		width: 218rpx;
+		height: 120rpx;
+		border-radius: 10rpx;
+	}
+
+	.delete-btn {
+		position: absolute;
+		right: 0rpx;
+		top: 0rpx;
+		border-radius: 40rpx;
+		width: 40rpx;
+		height: 40rpx;
+		font-size: 20rpx;
+		text-align: center;
+		line-height: 40rpx;
+		background-color: rgba(0, 0, 0, 0.7);
+		color: #FFFFFF;
+	}
+</style>

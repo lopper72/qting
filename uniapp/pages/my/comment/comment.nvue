@@ -1,0 +1,38 @@
+<template>
+	<view style="flex: 1;">
+		<my-comment style="flex: 1;" :user_id="userInfo.id" v-if="userInfo"></my-comment>
+		<text class="nodata-box" v-else>请先登陆</text>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	export default {
+		data() {
+			return {
+				
+			}
+		},
+		computed: {
+			...mapGetters(['statusBarHeight', 'pageInfo','userInfo','isLogin'])
+		},
+		onShow() {
+			
+		},
+		methods: {
+			
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+.nodata-box{
+	padding: 20rpx;
+	text-align: center;
+	font-size: $uni-font-size-base;
+	color: #F1F1F1;
+}
+
+</style>

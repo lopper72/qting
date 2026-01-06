@@ -1,0 +1,119 @@
+<template>
+	<view style="flex: 1;">
+		<view class="top-tab-box">
+			<view :style="{height:statusBarHeight+'px'}"></view>
+			<my-tab 
+				:current="tabIndex" 
+				:list="tabList" 
+				@change="onTabchange" 
+				height="100rpx" 
+				color="#C8C7CC" 
+				activedColor="#e4284b"
+				underLineColor="#e4284b"></my-tab>
+		</view>
+		<swiper class="page-content" :current="tabIndex" @change="onSwiperChange">
+			<swiper-item>
+				<my-comment style="flex: 1;"></my-comment>
+			</swiper-item>
+			<swiper-item>
+				<my-comment style="flex: 1;" :type="1"></my-comment>
+			</swiper-item>
+			<swiper-item>
+				<my-comment style="flex: 1;" :followed="true"></my-comment>
+			</swiper-item>
+		</swiper>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	import {
+		getComment
+	} from "@/js_sdk/video.js"
+	export default {
+		data() {
+			return {
+				tabIndex:1,
+				tabList:[{"title":"最新"},{"title":"推荐"},{"title":"关注"}]
+			}
+		},
+		computed: {
+			...mapGetters(['statusBarHeight', 'pageInfo'])
+		},
+		onLoad() {
+			
+		},
+		methods: {
+			onTabchange(e){
+				this.tabIndex = e.index
+			},
+			onSwiperChange({detail}){
+				this.tabIndex = detail.current
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+.nodata-box{
+	padding: 20rpx;
+	text-align: center;
+	font-size: $uni-font-size-base;
+	color: #F1F1F1;
+}
+.top-tab-box{
+	padding:0 20rpx;
+	background-color: #000000;
+}
+.page-content{
+	flex: 1;
+}
+.comment-list{
+	padding: 20rpx;
+}
+.comment-item{
+	border-bottom-color: #353535;
+	border-bottom-width: 1px;
+	padding: 20rpx 0;
+}
+.avatar-box{
+	flex-direction: row;
+	align-items: center;
+}
+.avatar-image{
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 80rpx;
+	border-width: 2px;
+	border-color: #ff7ddd;
+}
+.user-info{
+	flex-direction: column;
+	margin-left: 20rpx;
+}
+.username{
+	font-size: 32rpx;
+	font-weight: bold;
+	color: #F1F1F1;
+}
+.comment-date{
+	font-size: 28rpx;
+	color: #C8C7CC;
+}
+.comment-content{
+	padding: 20rpx 0;
+	font-size: $uni-font-size-base;
+	color: #F1F1F1;
+}
+.comment-image-list{
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.comment-image{
+	width: 215rpx;
+	height: 215rpx;
+	margin: 10rpx;
+}
+</style>

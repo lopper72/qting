@@ -1,0 +1,172 @@
+<template>
+	<view>
+		<view class="history-list">
+			<text class="nodata-box" v-if="!dataInfo || dataInfo.list.length == 0">{{loaded ? '暂无内容' : '正在加载...'}}</text>
+			<template v-for="(item,index) in dataInfo.list" v-else>
+				<view class="card-box" @click="goTodetail(item.movie)" v-if="item.movie">
+					<view class="left-box">
+						<image class="cate-image" :src="item.movie.thumb" v-if="item.movie.thumb"></image>
+						<image class="cate-image" v-else src="@/static/images/no_image.jpg"></image>
+					</view>
+					<view class="right-box">
+						<text class="card-title">{{item.movie.title}}</text>
+						<text class="card-subtitle">类型：{{item.movie.type_str}}</text>
+						<text class="card-subtitle">分类：{{item.movie.category_str}}</text>
+						<text class="card-subtitle">地区：{{item.movie.region_str}}</text>
+						<text class="card-subtitle">观看历史：{{item.mtime}}</text>
+						<text class="card-subtitle">观看剧集：{{item.movie_detail.title}}</text>
+						<text class="card-subtitle">观看时长：{{getDurationStr(item.second)}}</text>
+					</view>
+				</view>
+			</template>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	
+	import {historyList} from "@/js_sdk/video.js"
+	export default {
+		data() {
+			return {
+				dataInfo:null,
+				loaded:false
+			}
+		},
+		computed:{
+			...mapGetters(["userInfo"])
+		},
+		onShow() {
+			if(!this.dataInfo) this.getList()
+		},
+		onPullDownRefresh() {
+			this.getList(true)
+		},
+		onReachBottom() {
+			if(this.dataInfo && this.dataInfo.current_page>=this.dataInfo.total_page) return
+			this.dataInfo.current_page++
+			this.getList()
+		},
+		methods: {
+			getDurationStr(time){
+				if(time<60){
+					return time + "秒"
+				}else if(time>=60 && time <3600){
+					return parseInt(time/60) + "分" + (time%60) + "秒"
+				}else{
+					return parseInt(time/3600) + '时' + parseInt((time - parseInt(time/3600))/60) + "分" + (time%60) + "秒"
+				}
+			},
+			getList(replace){
+				historyList({
+					page:this.dataInfo ? this.dataInfo.current_page : 1,
+					user_id:this.userInfo.id,
+					type:4,
+					limit:20
+				}).then(res=>{//console.log(res)
+					this.loaded = true
+					uni.stopPullDownRefresh()
+					if(this.dataInfo){
+						if(replace){
+							this.dataInfo = res.data
+						}else{
+							this.dataInfo.list = this.dataInfo.list.concat(res.data.list)
+							this.dataInfo.total_page = res.data.total_page
+							this.dataInfo.current_page = res.data.current_page
+						}
+					}else{
+						uni.stopPullDownRefresh()
+						this.dataInfo = res.data
+					}
+				}).catch(error=>{
+					this.loaded = true
+					console.log(error)
+				})
+			},
+			goTodetail(item){
+				this.$store.dispatch("video",item)
+				uni.navigateTo({
+					url:"/pages/detail/detail?id="+item.id
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+.nodata-box{
+	padding: 20rpx;
+	text-align: center;
+	font-size: $uni-font-size-base;
+	color: #F1F1F1;
+}
+.history-list{
+	padding: 20rpx;
+}
+.follow-item{
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #2C405A;
+	border-radius: 10rpx;
+	padding: 20rpx;
+	margin-bottom: 20rpx;
+}
+.info-box{
+	flex-direction: row;
+	align-items: center;
+}
+.avatar-image{
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 80rpx;
+	border-width: 2px;
+	border-color: #ff7ddd;
+}
+.username{
+	font-size: 32rpx;
+	color: #F1F1F1;
+	margin-left: 20rpx;
+}
+.cancel-follow-btn{
+	background-color: #3F536E;
+	color: #F1F1F1;
+	font-size: $uni-font-size-sm;
+	padding: 10rpx 20rpx;
+	border-radius: 10rpx;
+}
+.card-box{
+	background-color: #313132;
+	border-radius: 10rpx;
+	padding: 10rpx 20rpx;
+	flex-direction: row;
+	margin-bottom: 20rpx;
+}
+.right-box{
+	margin-left: 20rpx;
+}
+.card-title{
+	font-size: $uni-font-size-base;
+	color: #C8C7CC;
+	margin-bottom: 10rpx;
+}
+.card-subtitle{
+	font-size: $uni-font-size-sm;
+	color: #C8C7CC;
+}
+.cate-image{
+	width: 180rpx;
+	height: 240rpx;
+	border-radius: 10rpx;
+}
+.card-content{
+	font-size: $uni-font-size-sm;
+	color: #C8C7CC;
+	width: 500rpx;
+	lines:3;
+	text-overflow: ellipsis;
+}
+</style>

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qting-api-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./storage:/var/www/storage
+    networks:
+      - qting
+
+  nginx:
+    image: nginx:alpine
+    container_name: qting-api-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - qting
+
+  db:
+    image: mysql:5.7
+    container_name: qting-api-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - qting
+
+  redis:
+    image: redis:alpine
+    container_name: qting-api-redis
+    restart: unless-stopped
+    networks:
+      - qting
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: qting-api-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: qting-api-db
+      PMA_PORT: 3306
+    depends_on:
+      - db
+    networks:
+      - qting
+
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  qting:
+    driver: bridge

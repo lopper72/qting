@@ -1,0 +1,194 @@
+<template>
+	<view class="content">
+		<view class="login-box">
+			<view class="logo-box">
+				<image class="logo-image" src="@/static/images/logo.png"></image>
+			</view>
+			<view class="form-item-box">
+				<input v-model="formData.username" type="number" class="input-box" placeholder="请输入手机号" />
+			</view>
+			<view class="form-item-box">
+				<input v-model="formData.password" class="input-box" password placeholder="请输入登陆密码" />
+			</view>
+			<view class="form-item-box">
+				<view class="submit-button" hover-class="button-hover" @click="onSubmit()">
+					<text class="submit-button-text">立即登陆</text>
+				</view>
+			</view>
+			<view class="form-item-box">
+				<view class="reglink-box">
+					<text class="reglink-text">没有账号？</text>
+					<text class="reglink-link" @click="goReg">立即注册</text>
+				</view>
+			</view>
+		</view>
+		<view class="protocols">
+			<checkbox-group @change="_checkedChange">
+				<checkbox value="accept" :checked="checked" style="transform:scale(0.7);" />
+			</checkbox-group>
+			<view class="protocols-text__box">
+				<text class="protocols-text__item">已阅读并同意</text>
+				<navigator url="/pages/register/agreement/agreement" hover-class="none">
+					<text class="protocols-text__label">《用户使用协议》</text>
+				</navigator>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {login,getUser} from "@/js_sdk/user.js"
+	export default {
+		data() {
+			return {
+				formData:{
+					username:null,
+					password:null
+				},
+				checked: true
+			}
+		},
+		onShow() {
+			
+		},
+		onBackPress() {
+			uni.switchTab({
+				url:"/pages/index/index"
+			})
+			return true
+		},
+		methods: {
+			_checkedChange({ detail }) {
+				if (detail.value.length) {
+					this.checked = true
+				} else {
+					this.checked = false
+				}
+			},
+			goReg(){
+				uni.navigateTo({
+					url:"/pages/register/register"
+				})
+			},
+			onSubmit(){
+				uni.hideKeyboard()
+				if(!this.formData.username){
+					uni.showToast({
+						icon:"none",
+						title:"请输入手机号"
+					})
+					return
+				}
+				if(!this.formData.password){
+					uni.showToast({
+						icon:"none",
+						title:"请输入登陆密码"
+					})
+					return
+				}
+				if (!this.checked) {
+					return uni.showToast({
+						title: '请同意用户使用协议',
+						icon: 'none'
+					})
+				}
+				uni.showLoading({
+					mask:true,
+					title:"正在登陆"
+				})
+				login(this.formData).then(res=>{
+					uni.setStorageSync("token",res.data.token)
+					uni.setStorageSync("expires_in",Date.now() + res.data.expires_in)
+					uni.showLoading({
+						mask:true,
+						title:"正在登陆"
+					})
+					getUser().then(_res=>{
+						this.$store.dispatch("userInfo",_res.data)
+						uni.navigateBack({
+							delta:1
+						})
+					}).catch(error=>{
+						console.log(error)
+					})
+				}).catch(error=>{
+					console.log(error)
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.protocols {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+	.protocols-text__item {
+		color: #FFFFFF;
+		font-size: 28rpx;
+	}
+	.protocols-text__box {
+		flex-direction: row;
+		align-items: center;
+	}
+	.protocols-text__label {
+		color: #f42c2c;
+		font-size: 28rpx;
+	}
+.content{
+	background-color: #0e0e0e;
+	flex: 1;
+	justify-content: space-between;
+	padding-bottom: 32rpx;
+}
+.logo-box{
+	align-items: center;
+	padding: 30rpx 0rpx 20rpx;
+}
+.logo-image{
+	width: 250rpx;
+	height: 250rpx;
+	border-radius: 250rpx;
+}
+.form-item-box{
+	padding: 20rpx 40rpx;
+}
+
+.input-box{
+	background-color:#1c1c1c;
+	border-radius: 10rpx;
+	height: 90rpx;
+	font-size: $uni-font-size-base;
+	color: $uni-text-color;
+	padding: 20rpx;
+}
+.submit-button{
+	padding: 26rpx;
+	border-radius: 10rpx;
+	background-color: #f42c2c;
+	margin-top: 30rpx;
+}
+.button-hover{
+	opacity: 0.7;
+}
+.submit-button-text{
+	font-size: $uni-font-size-base;
+	color: #FFFFFF;
+	text-align: center;
+}
+.reglink-box{
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+.reglink-text{
+	color: #F1F1F1;
+	font-size: $uni-font-size-base;
+}
+.reglink-link{
+	color: #f42c2c;
+	font-size: $uni-font-size-base;
+}
+</style>

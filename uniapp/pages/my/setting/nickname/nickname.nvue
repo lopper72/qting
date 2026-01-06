@@ -1,0 +1,63 @@
+<template>
+	<view>
+		<view class="form-item-box">
+			<input type="text" class="form-input" v-model="nickname" placeholder="请输入昵称" />
+		</view>
+		<view class="form-item-box">
+			<view class="submit-button" hover-class="button-hover" @click="onSubmit()">
+				<text class="submit-button-text">提交</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	import {
+		mapGetters
+	} from 'vuex'
+	
+	import {upateUser} from "@/js_sdk/user.js"
+	export default {
+		data() {
+			return {
+				nickname:""
+			}
+		},
+		computed: {
+			...mapGetters(['userInfo'])
+		},
+		onShow() {
+			this.nickname = this.userInfo.nickname
+		},
+		methods: {
+			onSubmit(){
+				uni.hideKeyboard()
+				
+				if(!this.nickname || this.nickname.length == 0){
+					uni.showToast({
+						icon:"none",
+						title:"请输入昵称"
+					})
+					return
+				}
+				
+				upateUser({
+					nickname:this.nickname
+				}).then(res=>{
+					uni.navigateBack({
+						delta:1
+					})
+					uni.showToast({
+						title:"设置成功"
+					})
+				}).catch(error=>{
+					console.log(error)
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+
+</style>
