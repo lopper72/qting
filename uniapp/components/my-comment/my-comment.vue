@@ -58,6 +58,7 @@
 		followUser,
 		cancelFollowUser
 	} from "@/js_sdk/user.js"
+	import {transformImageUrlsInObject, transformImageUrlsInArray} from '@/utils/imageUtils.js'
 	
 	export default {
 		data() {
@@ -98,18 +99,32 @@
 					this.loaded = true
 					this.pull_loading = false
 					if(replace){
+						// Transform image URLs in comments
 						this.commentData = res.data
+						transformImageUrlsInObject(this.commentData)
+						// Also transform individual comments in the list
+						if (this.commentData.list && this.commentData.list.length) {
+							transformImageUrlsInArray(this.commentData.list)
+						}
 					}else{
 						if(!this.commentData){
+							// Transform image URLs in comments
 							this.commentData = res.data
+							transformImageUrlsInObject(this.commentData)
+							// Also transform individual comments in the list
+							if (this.commentData.list && this.commentData.list.length) {
+								transformImageUrlsInArray(this.commentData.list)
+							}
 						}else{
+							// Transform new comments before adding to existing list
+							transformImageUrlsInArray(res.data.list)
 							this.commentData.list = this.commentData.list.concat(res.data.list)
 							this.commentData.total_page = res.data.total_page
 							this.commentData.current_page = res.data.current_page
 						}
 					}
 					 this.$refs["list"].resetLoadmore();
-					
+
 					//console.log(res)
 				}).catch(error=>{
 					this.pull_loading = false

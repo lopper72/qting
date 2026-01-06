@@ -9,9 +9,11 @@
 			
 			console.log('App Launch')
 			// 保持屏幕常亮
+			// #ifdef APP-PLUS
 			uni.setKeepScreenOn({
 			    keepScreenOn: true
 			})
+			// #endif
 			//获取用户信息
 			getUser().then(res=>{
 				this.$store.dispatch("userInfo",res.data)
@@ -19,7 +21,9 @@
 				console.log(error)
 			})
 			//强制竖屏，禁止横屏
+			// #ifdef APP-PLUS
 			plus.screen.lockOrientation('portrait-primary')
+			// #endif
 			const info = uni.getSystemInfoSync()
 			
 			//添加状态栏高度
@@ -46,7 +50,12 @@
 			view.addEventListener("click",({current})=>{
 				if(!current['url']) return
 				if(current.url.indexOf("http") == 0){
+					// #ifdef APP-PLUS
 					plus.runtime.openURL(current.url)
+					// #endif
+					// #ifndef APP-PLUS
+					window.open(current.url)
+					// #endif
 					return
 				}
 				if(current.url.indexOf("/pages/") == 0){
@@ -87,7 +96,9 @@
 				}
 			},1000)
 			//显示启动广告，显示后把默认启动图关闭
+			// #ifdef APP-PLUS
 			plus.navigator.closeSplashscreen()
+			// #endif
 			
 			getLanchAd().then(res=>{
 				var list = res.data

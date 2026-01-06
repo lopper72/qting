@@ -23,6 +23,7 @@
 	//#7b7b7b，#ff1337
 	import config from '@/common/config.js'
 	import {hotVideo} from '@/js_sdk/index.js'
+	import {transformImageUrlsInArray} from '@/utils/imageUtils.js'
 	
 	export default {
 		data() {
@@ -44,7 +45,14 @@
 			getHot(){
 				hotVideo().then(res=>{
 					uni.stopPullDownRefresh()
-					this.cateList = res.data
+					// Transform image URLs to use local development domain
+					const transformedData = res.data
+					transformedData.forEach(category => {
+						if (category.list && category.list.length) {
+							transformImageUrlsInArray(category.list)
+						}
+					})
+					this.cateList = transformedData
 				}).catch(error=>{
 					uni.stopPullDownRefresh()
 					console.log(error)

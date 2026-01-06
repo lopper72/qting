@@ -127,6 +127,7 @@
 		followUser,
 		cancelFollowUser
 	} from "@/js_sdk/user.js"
+	import {transformImageUrlsInObject, transformImageUrlsInArray} from '@/utils/imageUtils.js'
 	export default {
 		data() {
 			return {
@@ -168,9 +169,11 @@
 		methods: {
 			loadViedoInfo(){
 				getVideo(this.vid).then(res=>{//console.log(res)
+					// Transform image URLs in video info
 					this.videoInfo = res.data
+					transformImageUrlsInObject(this.videoInfo)
 					this.videoTitle = this.videoInfo.title
-					this.$store.dispatch("video",res.data)
+					this.$store.dispatch("video",this.videoInfo)
 					this.initPlayIndex()
 					uni.setNavigationBarTitle({
 						title:this.videoTitle
@@ -402,15 +405,27 @@
 					page:this.commentData ? this.commentData.current_page : 1
 				}).then(res=>{
 					if(replace){
-						this.commentData = res.data
+						// Transform image URLs in comments
+						this.commentData = transformImageUrlsInObject(res.data)
+						// Also transform individual comments in the list
+						if (this.commentData.list && this.commentData.list.length) {
+							this.commentData.list = transformImageUrlsInArray(this.commentData.list)
+						}
 					}else{
 						if(!this.commentData){
-							this.commentData = res.data
+							// Transform image URLs in comments
+							this.commentData = transformImageUrlsInObject(res.data)
+							// Also transform individual comments in the list
+							if (this.commentData.list && this.commentData.list.length) {
+								this.commentData.list = transformImageUrlsInArray(this.commentData.list)
+							}
 						}else{
-							this.commentData.list = this.commentData.list.concat(res.data.list)
+							// Transform new comments before adding to existing list
+							const newComments = transformImageUrlsInArray(res.data.list)
+							this.commentData.list = this.commentData.list.concat(newComments)
 						}
 					}
-					
+
 					//console.log(res)
 				}).catch(error=>{
 					console.log(error)
