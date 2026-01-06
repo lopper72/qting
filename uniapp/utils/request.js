@@ -18,11 +18,10 @@ const request = {
 	getHeader(header,path,token,white){
 		if(typeof header == 'undefined' || !header) header = {};
 		if(path.indexOf(this.getBaseUrl()) == 0){
-			header['X-Requested-With'] = 'XMLHttpRequest';
 			header['Authorization'] = token;
 			/*this.isStopRquest = token ? false : true;
 			var pages = getCurrentPages();
-			
+
 			//console.log(pages[0].route+"------",token);
 			if(!white && !token && pages && pages.length && pages[0].route != 'pages/login/login'){
 				uni.redirectTo({

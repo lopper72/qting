@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Production build service - builds directly in Docker
+  uniapp-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    container_name: qting-uniapp-build
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - qting
+
+  # Development service - uses volume mount for hot-reload
+  uniapp-dev:
+    build: .
+    container_name: qting-uniapp-dev
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./dist/build/h5:/usr/share/nginx/html
+    networks:
+      - qting
+
+networks:
+  qting:
+    external: true
