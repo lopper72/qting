@@ -44,7 +44,7 @@ module.exports = {
         target: `http://localhost:8000`,
         changeOrigin: true,
         pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API]: '/admin-api/v1'
+          ['^' + process.env.VUE_APP_BASE_API]: '/api/v1'
         }
       }
     }
