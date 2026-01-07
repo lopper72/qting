@@ -68,6 +68,13 @@ const request = {
 		this.requestUrl = path;
 		this.lastResult = result;
 		
+		// Add detailed logging for debugging
+		console.log('=== API REQUEST START ===');
+		console.log('URL:', path);
+		console.log('Method:', method);
+		console.log('Data:', data);
+		console.log('Headers:', header);
+
 		uni.request({
 			url:path,
 			data:data,
@@ -76,8 +83,15 @@ const request = {
 			success(res) {
 				_this.requestUrl = null;
 				uni.hideLoading();
+
+				// Log the response
+				console.log('=== API RESPONSE ===');
+				console.log('Status Code:', res.statusCode);
+				console.log('Response Data:', res.data);
+
 				//如果是已停止请求，则忽略返回的数据
 				if((_this.isStopRquest && !white)){
+					console.log('Request stopped, ignoring response');
 					return;
 				}
 				if(res.data.code == 500 && res.data.msg.indexOf("token")>0 && !white){
@@ -85,12 +99,12 @@ const request = {
 						return;
 					}
 					uni.getStorageSync("token",null);
-					
+
 					var pages = getCurrentPages();
 					if(pages && pages.length && pages[0].route == '/pages/login/login'){
 						return;
 					}
-					
+
 					uni.navigateTo({
 						url:"/pages/login/login"
 					})
@@ -106,7 +120,7 @@ const request = {
 							title:res.data.msg ? res.data.msg : '数据请求出错'
 						});
 					}
-					
+
 					if(typeof result.fail == 'function'){
 						result.fail({message:res.data.msg ? res.data.msg : '数据请求出错',data:null,code:res.data.code});
 					}
@@ -114,9 +128,13 @@ const request = {
 			},
 			fail(res) {
 				_this.requestUrl = null;
-				
+
 				uni.hideLoading();
-				
+
+				// Log the error
+				console.log('=== API REQUEST FAILED ===');
+				console.log('Error:', res);
+
 				//如果是已停止请求，则忽略返回的数据
 				if(_this.isStopRquest && !white){
 					return;
