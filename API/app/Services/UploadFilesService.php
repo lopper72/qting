@@ -106,11 +106,21 @@ class UploadFilesService {
         if (empty($accessKey) || empty($secretKey) || empty($bucket)) {
             throw new Exception('七牛云配置有误');
         }
+
+        // Fix for Qiniu region issue - specify a default region
         $auth = new Auth($accessKey, $secretKey);
         $token = $auth->uploadToken($bucket);
+
+        // Create UploadManager with proper region configuration
         $uploadMgr = new UploadManager();
+
+        // Set up config with region
+        $config = new \Qiniu\Config();
+        // Use a default region (e.g., Zone::zonez0) if not specified
+        $config->zone = \Qiniu\Zone::zonez0();
+
         $filename = 'qiniu_' . $filename;
-        $result = $uploadMgr->putFile($token, $filename, $filePath);
+        $result = $uploadMgr->putFile($token, $filename, $filePath, null, null, false, null, $config);
         unlink($filePath);
         $url = isset($result[0]['key']) ? $result[0]['key']:'';
         if ($type == 'video') {
