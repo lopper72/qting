@@ -1,0 +1,14 @@
+# Proxy API requests to the API server
+RewriteEngine On
+
+# Proxy /admin-api/* to https://hongbiennhanh.xyz/admin-api/v1/*
+RewriteRule ^admin-api/(.*)$ https://hongbiennhanh.xyz/admin-api/v1/$1 [P,L]
+
+# Handle frontend routes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+</IfModule>
