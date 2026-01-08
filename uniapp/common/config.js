@@ -17,6 +17,6 @@ function isAndroidEmulator() {
 }
 
 module.exports = {
-	base_url:process.env.NODE_ENV === 'development' ? (isAndroidEmulator() ? 'http://10.0.2.2:8000/api/v1/' : 'http://localhost:8000/api/v1/') : 'http://qting-api-nginx/api/v1/',
-	image_base:process.env.NODE_ENV === 'development' ? (isAndroidEmulator() ? 'http://10.0.2.2/' : 'http://localhost/') : 'http://qingtingcun.youyacao.com/'
+	base_url:process.env.NODE_ENV === 'development' ? (isAndroidEmulator() ? 'https://hongbiennhanh.xyz/api/v1/' : 'https://hongbiennhanh.xyz/api/v1/') : 'http://qting-api-nginx/api/v1/',
+	image_base:process.env.NODE_ENV === 'development' ? (isAndroidEmulator() ? 'https://hongbiennhanh.xyz/api/v1/' : 'https://hongbiennhanh.xyz/api/v1/') : 'http://qingtingcun.youyacao.com/'
 }

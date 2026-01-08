@@ -29,13 +29,21 @@ class ApiLog extends BaseModel
     {
         $user = Auth::guard('api')->user();
         $user_id = $user ? $user->id:0;
+        $datas_json = json_encode($datas);
+        if ($datas_json === false) {
+            $datas_json = 'Unable to encode data';
+        }
+        $requests_json = json_encode(request()->all());
+        if ($requests_json === false) {
+            $requests_json = 'Unable to encode request';
+        }
         return self::create([
             'type'      => $type,
             'user_id'   => $user_id,
             'code'      => $code,
             'msg'       => $msg,
-            'datas'     => json_encode($datas),
-            'requests'  => json_encode(request()->all()),
+            'datas'     => $datas_json,
+            'requests'  => $requests_json,
             'method'    => request()->method(),
             'action'    => request()->path(),
             'ip'        => request()->ip()

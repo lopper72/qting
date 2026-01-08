@@ -159,6 +159,21 @@ class UserController extends BaseController
         }
     }
 
+    public function show($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return $this->error('用户不存在');
+        }
+        $userData = $user->toArray();
+        $userData['is_audio'] = (string)$userData['is_audio'];
+        $userData['avatar2'] = dealAvatar($userData['avatar']);
+        $userData['roles'] = $user->getRoleNames()->toArray();
+        $userData['vip_end_time'] = $userData['vip_end_time'] ? date('Y-m-d',$userData['vip_end_time']):0;
+        $userData['tags'] = UserHasTags::where('user_id', $userData['id'])->pluck('tag_id')->toArray();
+        return $this->success('成功', $userData);
+    }
+
     public function destroy($id)
     {
         $user = User::where('id', $id)->first();
