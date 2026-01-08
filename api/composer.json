@@ -8,12 +8,12 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.2",
+        "php": "^7.2 || ^8.2",
         "aliyuncs/oss-sdk-php": "^2.3",
         "fideloper/proxy": "^4.0",
         "intervention/image": "^2.5",
         "jaeger/querylist": "^4.2",
-        "laravel/framework": "^6.2",
+        "laravel/framework": "^6.20.44",
         "laravel/socialite": "^4.3",
         "laravel/tinker": "^2.0",
         "mews/captcha": "^3.1",
@@ -37,7 +37,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "7.4.33"
+        }
     },
     "extra": {
         "laravel": {

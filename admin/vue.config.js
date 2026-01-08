@@ -41,10 +41,10 @@ module.exports = {
       // change xxx-api/login => admin-api/v1/login
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
-        target: `http://localhost:8000`,
+        target: process.env.VUE_APP_API_URL || 'http://hongbiennhanh.xyz',
         changeOrigin: true,
         pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API]: '/api/v1'
+          ['^' + process.env.VUE_APP_BASE_API]: ''
         }
       }
     }
