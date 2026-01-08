@@ -30,7 +30,7 @@ Route::namespace('Api\V1')->prefix('v1')->group(function () {
             Route::any('system/all', 'SystemController@all')->name('system.all');
             Route::any('system/save', 'SystemController@save')->name('system.save');
             Route::any('up', 'UploadController@up')->name('upload.file');
-            Route::any('upload', 'UploadController@upload')->name('upload.image');
+            Route::any('upload', 'UploadController@up')->name('upload.image');
             Route::any('uploadVideo', 'UploadController@upVideo')->name('upload.video');
             Route::apiResource('roles', 'RoleController');
             Route::apiResource('permission', 'PermissionController');

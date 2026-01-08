@@ -16,20 +16,7 @@ class UploadController extends BaseController
     public function up(Request $request)
     {
         try {
-            if (!$request->hasFile('file')) {
-                throw new Exception('无法获取上传文件');
-            }
-            $file = $request->file('file');
-            if (!$file->isValid()) {
-                throw new Exception('文件未通过验证');
-            }
-            $fileExtension = strtolower($file->getClientOriginalExtension());
-            $filePath = $file->getRealPath();
-            $filename = genRequestSn() . '.' . $fileExtension;
-            // 文件原名
-            $originaName = $file->getClientOriginalName();
-            $data = app('upload')->qiniu_upload($filename, $filePath);
-            $data['name'] = $originaName;
+            $data = app('upload')->up($request);
             return $this->success('保存成功', $data);
         } catch (Exception $e) {
             return $this->error($e->getMessage());
